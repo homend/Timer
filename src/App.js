@@ -1,5 +1,6 @@
 import React from 'react';
 import Time from './utils/time';
+// import loop from './utils/loop';
 import "./App.css";
 
 export default class extends React.Component {
@@ -23,17 +24,12 @@ export default class extends React.Component {
     FONT: '14px Lucida Sans',
     TEXT_HIGHLIGHT_COLOR: 'rgba(255,0,0,1)',
   };
-  
-  render(){
-    return (
-      <canvas id="time"></canvas>
-    )
-  }
 
-  init(){
+  init() {
     this.board.canvas = document.querySelector('#time');
     this.board.context = this.board.canvas.getContext('2d');
 
+    console.log(this.time)
 
     this.resizeCallback();
     this.draw();
@@ -42,6 +38,10 @@ export default class extends React.Component {
       this.resizeCallback();
       this.draw();
     }, false);
+
+
+    // loop(() => {
+    // })
   }
 
   // 绘画
@@ -76,10 +76,10 @@ export default class extends React.Component {
     })
   }
 
-  // 圆弧画字
+  // 圆弧画字 (Math.PI/2为旋转90度  Math.PI/180*X为旋转多少度)
   drawCircularText(key, radius) {
-    const list = this.time.times[key];
-    const currentTime = this.time.currentTime;
+    const list = this.time.times[key].list;
+    // const currentTime = this.time.currentTime;
     const circle = {
       x: this.board.width / 2,
       y: this.board.height / 2
@@ -99,17 +99,26 @@ export default class extends React.Component {
     context.font = this.style.FONT;
 
     list.forEach((e,idx) => {
-      const angle = startAngle + (angleDecrement * idx)
+      let angle = startAngle + (angleDecrement * idx)
+      if(key === 'seconds'){
+        // console.log(angleDecrement * length)
+        // angle += angleDecrement * (length - 4)
+        // angle -= (Math.PI / 360)
+        // angle -= angleDecrement * 1
+        // console.log(angleDecrement)
+      }
       context.save();
       context.beginPath();
-      if(e === currentTime[key]){
+      // const label = currentTime[key].label
+      if(angle === 0){
         context.fillStyle = this.style.TEXT_HIGHLIGHT_COLOR;
       }
       const x = circle.x + Math.cos(angle) * radius;
-      const y = circle.y - Math.sin(angle) * radius
+      const y = circle.y - Math.sin(angle) * radius;
+      const rotateAngle = Math.PI * 2 - angle
       context.translate(x, y);
-      context.rotate(Math.PI * 2 - angle); //Math.PI/2为旋转90度  Math.PI/180*X为旋转多少度
-      context.fillText(e,0,0);
+      context.rotate(rotateAngle);
+      context.fillText(e, 0, 0);
       context.closePath();
       context.restore();
     });
@@ -128,5 +137,11 @@ export default class extends React.Component {
   // 初始化
   componentDidMount() {
     this.init();
+  }
+
+  render(){
+    return (
+      <canvas id="time"></canvas>
+    )
   }
 }

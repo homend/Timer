@@ -21,10 +21,12 @@ const formatNumberOptions = {
   10: '十'
 };
 
+// 获取一个月有多少天
 const getMonthDay = (year,month) => {
   return new Date(year, month, 0).getDate();
 }
 
+// 格式化数字转换成中文
 const formatNumber = (num,unit) => {
   let result = '';
   if(num < 10){
@@ -41,34 +43,91 @@ const formatNumber = (num,unit) => {
 
 export default class {
   constructor() {
+    this.initTimes();
+    this.initCurrentTimes()
+  }
+
+  // 初始化
+  initCurrentTimes() {
+    let currentTimes = {}
+    const updates = {
+      years(){
+        const num = new Date().getFullYear();
+        this.value = num;
+        this.label = num + timeUnit.year;
+      },
+      months(){
+        const num = new Date().getMonth();
+        this.value = num + 1;
+        this.label = formatNumber(num, timeUnit.month);
+      },
+      days(){
+        const num = new Date().getDate();
+        this.value = num;
+        this.label = formatNumber(num, timeUnit.day);
+      },
+      hours(){
+        const num = new Date().getHours();
+        this.value = num;
+        this.label = formatNumber(num, timeUnit.hour);
+      },
+      minutes(){
+        const num = new Date().getMinutes();
+        this.value = num;
+        this.label = formatNumber(num, timeUnit.minute);
+      },
+      seconds(){
+        const num = new Date().getSeconds();
+        this.value = num;
+        this.label = formatNumber(num, timeUnit.second);
+      }
+    }
+    Object.keys(updates).forEach(key => {
+      currentTimes[key] = {
+        value: null,
+        label:null,
+        update: updates[key]
+      }
+      currentTimes[key].update()
+    })
+    setInterval(() => {
+      Object.keys(this.currentTime).forEach(key => {
+        this.currentTime[key].update()
+      })
+    }, 1000)
+    this.currentTime = currentTimes
+  }
+
+  // 初始化时间
+  initTimes() {
     this.times = {
-      years: [],
-      months: Array(12).fill('').map((e,idx) => formatNumber(idx + 1, timeUnit.month)),
-      days: [],
-      hours: Array(24).fill('').map((e,idx) => formatNumber(idx, timeUnit.hour)),
-      minutes: Array(60).fill('').map((e,idx) => formatNumber(idx, timeUnit.minute)),
-      seconds: Array(60).fill('').map((e,idx) => formatNumber(idx, timeUnit.second))
+      years: {
+        list: [],
+        update(){
+          this.list = [new Date().getFullYear() + timeUnit.year];
+        }
+      },
+      months: {
+        list: Array(12).fill('').map((e,idx) => formatNumber(idx + 1, timeUnit.month))
+      },
+      days: {
+        list: [],
+        update(){
+          const length = getMonthDay(new Date().getFullYear(), new Date().getMonth() + 1);
+          this.list = Array(length).fill('').map((e,idx) => formatNumber(idx + 1, timeUnit.day));
+        }
+      },
+      hours: {
+        list: Array(24).fill('').map((e,idx) => formatNumber(idx, timeUnit.hour))
+      },
+      minutes: {
+        list: Array(60).fill('').map((e,idx) => formatNumber(idx, timeUnit.minute))
+      },
+      seconds: {
+        list: Array(60).fill('').map((e,idx) => formatNumber(idx, timeUnit.second))
+      }
     }
-
-    this.updateYear();
-    this.updateDays(5);
-
-    this.currentTime = {
-      years: this.times.years[0],
-      months: this.times.months[0],
-      days: this.times.days[0],
-      hours: this.times.hours[0],
-      minutes: this.times.minutes[0],
-      seconds: this.times.seconds[0]
-    }
-  }
-
-  updateYear(){
-    this.times.years = [new Date().getFullYear() + timeUnit.year];
-  }
-
-  updateDays(month){
-    const length = getMonthDay(new Date().getFullYear(), month === undefined ? new Date().getMonth() + 1 : month);
-    this.times.days = Array(length).fill('').map((e,idx) => formatNumber(idx + 1, timeUnit.day));
+    this.times.years.update()
+    this.times.days.update()
   }
 }
