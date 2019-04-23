@@ -57,8 +57,8 @@ export default class {
         this.label = num + timeUnit.year;
       },
       months(){
-        const num = new Date().getMonth();
-        this.value = num + 1;
+        const num = new Date().getMonth() + 1;
+        this.value = num;
         this.label = formatNumber(num, timeUnit.month);
       },
       days(){

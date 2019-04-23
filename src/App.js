@@ -1,6 +1,6 @@
 import React from 'react';
 import Time from './utils/time';
-// import loop from './utils/loop';
+import loop from './utils/loop';
 import "./App.css";
 
 export default class extends React.Component {
@@ -40,19 +40,20 @@ export default class extends React.Component {
     }, false);
 
 
-    // loop(() => {
-    // })
+    loop(() => {
+      this.draw()
+    })
   }
 
   // 绘画
   async draw() {
     await this.drawBg();
     this.drawCircularText('years', 0);
-    this.drawCircularText('months', 80);
-    this.drawCircularText('days', 150);
-    this.drawCircularText('hours', 230);
-    this.drawCircularText('minutes', 310);
-    this.drawCircularText('seconds', 390);
+    this.drawCircularText('months', 50);
+    this.drawCircularText('days', 120);
+    this.drawCircularText('hours', 210);
+    this.drawCircularText('minutes', 300);
+    this.drawCircularText('seconds', 400);
   }
 
   // 绘制背景图
@@ -79,37 +80,34 @@ export default class extends React.Component {
   // 圆弧画字 (Math.PI/2为旋转90度  Math.PI/180*X为旋转多少度)
   drawCircularText(key, radius) {
     const list = this.time.times[key].list;
-    // const currentTime = this.time.currentTime;
+
+    const currentTime = this.time.currentTime[key];
+
+    // 圆中心
     const circle = {
       x: this.board.width / 2,
       y: this.board.height / 2
     };
 
     const context = this.board.context;
-    
-    let startAngle = Math.PI * 0;
-    const endAngle = Math.PI * 2;
-    const length = list.length;
-    const angleDecrement = (startAngle - endAngle) / length; //每个节点占的弧度
+
+    const angleDecrement = (Math.PI * 2) / list.length; //每个节点占的弧度
 
     context.save();
-    context.textAlign = 'center';
+    context.textAlign = key === 'years' ? 'center' : 'left';
     context.textBaseLine = 'middle';
     context.fillStyle = this.style.TEXT_COLOR;
     context.font = this.style.FONT;
 
+    let startAngle = 0;
     list.forEach((e,idx) => {
-      let angle = startAngle + (angleDecrement * idx)
-      if(key === 'seconds'){
-        // console.log(angleDecrement * length)
-        // angle += angleDecrement * (length - 4)
-        // angle -= (Math.PI / 360)
-        // angle -= angleDecrement * 1
-        // console.log(angleDecrement)
+      let angle = startAngle - (angleDecrement * idx)
+      if(key !== 'years'){
+        const flag = (key === 'months' || key === 'days' ? -1 : 0)
+        angle += angleDecrement * (currentTime.value + flag)
       }
       context.save();
       context.beginPath();
-      // const label = currentTime[key].label
       if(angle === 0){
         context.fillStyle = this.style.TEXT_HIGHLIGHT_COLOR;
       }
